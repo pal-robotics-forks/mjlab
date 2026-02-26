@@ -27,6 +27,11 @@ from mjlab.managers.metrics_manager import (
   MetricsTermCfg,
   NullMetricsManager,
 )
+from mjlab.managers.evaluation_manager import (
+  EvaluationManager,
+  EvaluationTermCfg,
+  NullEvaluationManager,
+)
 from mjlab.managers.observation_manager import ObservationGroupCfg, ObservationManager
 from mjlab.managers.reward_manager import RewardManager, RewardTermCfg
 from mjlab.managers.termination_manager import TerminationManager, TerminationTermCfg
@@ -85,6 +90,8 @@ class ManagerBasedRlEnvCfg:
   """Event terms for domain randomization and state resets. Default includes
   ``reset_scene_to_default`` which resets entities to their initial state.
   Can be set to empty to disable all events including default reset."""
+
+  evaluation: dict[str, EvaluationTermCfg] = field(default_factory=dict)
 
   seed: int | None = None
   """Random seed for reproducibility. If None, a random seed is used. The actual
@@ -308,6 +315,12 @@ class ManagerBasedRlEnv:
     else:
       self.metrics_manager = NullMetricsManager()
     print_info(f"[INFO] {self.metrics_manager}")
+    print(f"render_mode: {self.render_mode}")
+    if (self.render_mode == "human" or self.render_mode is None) and (len(self.cfg.evaluation) > 0):
+      self.evaluation_manager = EvaluationManager(self.cfg.evaluation, self)
+    else :
+      self.evaluation_manager = NullEvaluationManager()
+    print_info(f"[INFO] {self.evaluation_manager}")
 
     # Configure spaces for the environment.
     self._configure_gym_env_spaces()
@@ -315,6 +328,7 @@ class ManagerBasedRlEnv:
     # Initialize startup events if defined.
     if "startup" in self.event_manager.available_modes:
       self.event_manager.apply(mode="startup")
+
 
   def reset(
     self,
@@ -406,6 +420,8 @@ class ManagerBasedRlEnv:
 
     self.sim.sense()
     self.obs_buf = self.observation_manager.compute(update_history=True)
+
+    self.evaluation_manager.process_eval()
 
     return (
       self.obs_buf,
@@ -522,3 +538,8 @@ class ManagerBasedRlEnv:
     self.extras["log"].update(info)
     # reset the episode length buffer.
     self.episode_length_buf[env_ids] = 0
+    # evaluation manager.
+    info = self.evaluation_manager.reset(env_ids)
+    
+    
+

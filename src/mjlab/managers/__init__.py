@@ -31,3 +31,9 @@ from mjlab.managers.reward_manager import RewardTermCfg as RewardTermCfg
 from mjlab.managers.scene_entity_config import SceneEntityCfg as SceneEntityCfg
 from mjlab.managers.termination_manager import TerminationManager as TerminationManager
 from mjlab.managers.termination_manager import TerminationTermCfg as TerminationTermCfg
+
+
+# ADDED
+from mjlab.managers.evaluation_manager import EvaluationManager as EvaluationManager
+from mjlab.managers.evaluation_manager import EvaluationTerm as EvaluationTerm
+from mjlab.managers.evaluation_manager import EvaluationTermCfg as EvaluationTermCfg

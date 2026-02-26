@@ -6,6 +6,7 @@ Robot-specific configurations call the factory and customize as needed.
 
 import math
 from dataclasses import replace
+import torch
 
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
@@ -27,6 +28,8 @@ from mjlab.terrains import TerrainImporterCfg
 from mjlab.terrains.config import ROUGH_TERRAINS_CFG
 from mjlab.utils.noise import UniformNoiseCfg as Unoise
 from mjlab.viewer import ViewerConfig
+
+from mjlab.managers.evaluation_manager import EvaluationTermCfg
 
 
 def make_velocity_env_cfg() -> ManagerBasedRlEnvCfg:
@@ -326,6 +329,22 @@ def make_velocity_env_cfg() -> ManagerBasedRlEnvCfg:
   }
 
   ##
+  # Evaluation
+  ##
+
+  def eval_func_exp_quadratic (values : torch.Tensor, reference_value : float) -> torch.Tensor :
+    return torch.exp( - 5.0 * torch.square(values - reference_value))
+
+  evaluation = {
+    "Joint_Pos_0" : EvaluationTermCfg(
+      weight = 1,
+      method = eval_func_exp_quadratic,
+      reference_value = 1.0,
+      values = "data.joint_pos",
+    ),
+  }
+
+  ##
   # Terminations
   ##
 
@@ -392,6 +411,7 @@ def make_velocity_env_cfg() -> ManagerBasedRlEnvCfg:
     rewards=rewards,
     terminations=terminations,
     curriculum=curriculum,
+    evaluation=evaluation,
     viewer=ViewerConfig(
       origin_type=ViewerConfig.OriginType.ASSET_BODY,
       entity_name="robot",
@@ -412,3 +432,4 @@ def make_velocity_env_cfg() -> ManagerBasedRlEnvCfg:
     decimation=4,
     episode_length_s=20.0,
   )
+
