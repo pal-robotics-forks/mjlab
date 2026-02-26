@@ -82,7 +82,7 @@ class EvaluationManager(ManagerBase):
     self._update_every = 100
 
     n = len(self._terms)
-    window, axes = plt.subplots(n, 2, figsize=(12, 4 * n), gridspec_kw={'width_ratios': [3, 1]})
+    window, axes = plt.subplots(n, 2, figsize=(12, 4 * n), gridspec_kw={'width_ratios': [10, 1]})
     self._evaluation_window = window
 
     self._lines = {}
