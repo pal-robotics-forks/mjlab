@@ -25,16 +25,16 @@ class EvaluationTermCfg(abc.ABC):
 
   Action terms evaluate chosen metrics on a given environment. Can be used on parallelised envs, returning mean evaluations"""
 
-  weight:float
+  weight: float
   """ Weight for this term, in case user want to do weighted combination of terms"""
 
-  method : Callable[..., torch.Tensor]
+  method: Callable[..., torch.Tensor]
   """ Mathematical method bound to this evaluation term """
 
-  reference_value : float
+  reference_value: float
   """ Reference value that will be used during evaluation computation """
 
-  values : str
+  values: str
   """ Tensor containing the value(s) that will be compared to reference value """
 
   def build(self, env: ManagerBasedRlEnv) -> EvaluationTerm:
@@ -42,10 +42,10 @@ class EvaluationTermCfg(abc.ABC):
 
 
 class EvaluationTerm(ManagerTermBase):
-  """Base class for action terms.
+  """Base class for evaluation terms.
 
-  The action term is responsible for processing the raw actions sent to the environment
-  and applying them to the entity managed by the term.
+  The evaluation term is responsible for evaluating a chosen metric on a given
+  environment. Can be used on parallelised envs, returning mean evaluations.
   """
 
   def __init__(self, cfg: EvaluationTermCfg, env: ManagerBasedRlEnv):
@@ -56,19 +56,19 @@ class EvaluationTerm(ManagerTermBase):
 
   def get_attribute_from_string(self, obj, path: str):
     for key in path.split("."):
-        obj = getattr(obj, key)
+      obj = getattr(obj, key)
     return obj
 
   def process_evaluation(self) -> None:
     # val is of shape [num_envs, 1]
-    val = self.get_attribute_from_string(self._entity,self.cfg.values)
+    val = self.get_attribute_from_string(self._entity, self.cfg.values)
 
     # Store meaned results of evaluating method
-    self.eval_result = (torch.mean(self.cfg.method(val,self.cfg.reference_value))).item()
+    self.eval_result = (torch.mean(self.cfg.method(val, self.cfg.reference_value))).item()
 
 
 class EvaluationManager(ManagerBase):
-  """Manages action processing for the environment.
+  """Manages evaluation processing for the environment.
 
   The evaluation manager aggregates multiple evaluation terms, each evaluating a different
   metric of the simulation.
@@ -78,13 +78,34 @@ class EvaluationManager(ManagerBase):
     self.cfg = cfg
     super().__init__(env=env)
 
+    self._step_counter = 0
+    self._update_every = 100
+
     n = len(self._terms)
-    window, axes = plt.subplots(1, n, figsize=(3 * n, 8))
+    window, axes = plt.subplots(n, 2, figsize=(12, 4 * n), gridspec_kw={'width_ratios': [3, 1]})
     self._evaluation_window = window
-    self._main_plot = axes[0] if n > 1 else axes  # handle n=1 edge case
+
+    self._lines = {}
+    self._line_plots = {}
+    self._bar_plots = {}
+    self._history = {name: [] for name in self._terms.keys()}
+    self._x_history = []
     self._graph_terms = []
     self._eval_results = []
-    
+
+    for i, name in enumerate(self._terms.keys()):
+      row = axes[i] if n > 1 else axes
+      self._line_plots[name] = row[0]
+      self._bar_plots[name] = row[1]
+
+      line, = self._line_plots[name].plot([], [], label=name)
+      self._lines[name] = line
+      self._line_plots[name].set_ylim(0, 1)
+      self._line_plots[name].set_title(name)
+      self._bar_plots[name].set_ylim(0, 1)
+
+    plt.tight_layout()
+    plt.show(block=False)
 
   def __str__(self) -> str:
     msg = f"<EvaluationManager> contains {len(self._term_names)} active terms.\n"
@@ -100,6 +121,7 @@ class EvaluationManager(ManagerBase):
     return msg
 
   # Properties.
+
   @property
   def total_evaluation_dim(self) -> int:
     return sum(self.evaluation_term_dim)
@@ -109,7 +131,7 @@ class EvaluationManager(ManagerBase):
     return [1 for term in self._terms.values()]
 
   @property
-  def evaluation_window(self) -> torch.Tensor:
+  def evaluation_window(self):
     return self._evaluation_window
 
   @property
@@ -118,40 +140,50 @@ class EvaluationManager(ManagerBase):
 
   # Methods.
 
-  def get_term(self, name: str) -> ActionTerm:
+  def get_term(self, name: str) -> EvaluationTerm:
     return self._terms[name]
 
   def reset(self, env_ids: torch.Tensor | slice | None = None) -> dict[str, float]:
     if env_ids is None:
       env_ids = slice(None)
 
-    # Reset eval terms.
     for term in self._terms.values():
       term.reset(env_ids=env_ids)
     return {}
-    
 
   def refresh_mainplot(self) -> None:
-    self._main_plot.clear()
-    self._main_plot.set_ylim(0, 1)  # fix your scale here
-    self._main_plot.bar(self._graph_terms, self._eval_results)
-    plt.pause(1e-9)
+    self._step_counter += 1
+    if self._step_counter % self._update_every != 0:
+      return
+
+    self._x_history.append(self._step_counter)
+    for name, result in zip(self._graph_terms, self._eval_results):
+      self._history[name].append(result)
+      self._lines[name].set_data(self._x_history, self._history[name])
+      self._line_plots[name].set_xlim(0, self._step_counter)
+
+      self._bar_plots[name].clear()
+      self._bar_plots[name].set_ylim(0, 1)
+      mean = sum(self._history[name]) / len(self._history[name])
+      self._bar_plots[name].bar([name], [mean])
+
+    plt.pause(0.001)
 
   def process_eval(self) -> None:
     self._graph_terms = []
     self._eval_results = []
     for term_name in self._terms.keys():
-        self._terms[term_name].process_evaluation()
-        self._graph_terms.append(term_name)
-        self._eval_results.append(self._terms[term_name].eval_result)
+      self._terms[term_name].process_evaluation()
+      self._graph_terms.append(term_name)
+      self._eval_results.append(self._terms[term_name].eval_result)
     self.refresh_mainplot()
 
   def _prepare_terms(self):
     self._term_names: list[str] = list()
-    self._terms: dict[str, ActionTerm] = dict()
+    self._terms: dict[str, EvaluationTerm] = dict()
 
     for term_name, term_cfg in self.cfg.items():
-      term_cfg: ActionTermCfg | None
+      term_cfg: EvaluationTermCfg | None
       if term_cfg is None:
         print(f"term: {term_name} set to None, skipping...")
         continue
@@ -168,12 +200,10 @@ class NullEvaluationManager:
     self.cfg = None
 
   def __str__(self) -> str:
-    return "<NullMetricsManager> (inactive)"
+    return "<NullEvaluationManager> (inactive)"
 
   def reset(self, env_ids: torch.Tensor | None = None) -> dict[str, float]:
     return {}
 
   def process_eval(self) -> None:
     return None
-
-

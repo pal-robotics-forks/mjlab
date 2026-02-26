@@ -339,10 +339,17 @@ def make_velocity_env_cfg() -> ManagerBasedRlEnvCfg:
     "Joint_Pos_0" : EvaluationTermCfg(
       weight = 1,
       method = eval_func_exp_quadratic,
-      reference_value = 1.0,
+      reference_value = 0.0,
       values = "data.joint_pos",
     ),
+    "Joint_Vel_0" : EvaluationTermCfg(
+      weight = 1,
+      method = eval_func_exp_quadratic,
+      reference_value = 0.0,
+      values = "data.joint_vel",
+    ),
   }
+  
 
   ##
   # Terminations

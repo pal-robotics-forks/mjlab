@@ -316,7 +316,7 @@ class ManagerBasedRlEnv:
       self.metrics_manager = NullMetricsManager()
     print_info(f"[INFO] {self.metrics_manager}")
     print(f"render_mode: {self.render_mode}")
-    if (self.render_mode == "human" or self.render_mode is None) and (len(self.cfg.evaluation) > 0):
+    if (self.render_mode == "human") and (len(self.cfg.evaluation) > 0):
       self.evaluation_manager = EvaluationManager(self.cfg.evaluation, self)
     else :
       self.evaluation_manager = NullEvaluationManager()
