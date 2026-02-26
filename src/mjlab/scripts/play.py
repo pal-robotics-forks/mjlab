@@ -147,7 +147,7 @@ def run_play(task_id: str, cfg: PlayConfig):
   if cfg.video_width is not None:
     env_cfg.viewer.width = cfg.video_width
 
-  render_mode = "rgb_array" if (TRAINED_MODE and cfg.video) else if (TRAINED_MODE) render_mode = "human" else None
+  render_mode = "rgb_array" if (TRAINED_MODE and cfg.video) else render_mode = "human" if (TRAINED_MODE) else None
   if cfg.video and DUMMY_MODE:
     print(
       "[WARN] Video recording with dummy agents is disabled (no checkpoint/log_dir)."
