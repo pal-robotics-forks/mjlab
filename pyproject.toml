@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "mjlab"
-version = "1.1.1"
+version = "1.2.0"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 readme = { file = "README.md", content-type = "text/markdown" }
@@ -36,7 +36,7 @@ dependencies = [
   "tyro>=1.0.1",
   "torch>=2.7.0",
   "torchrunx>=0.3.4",
-  "warp-lang>=1.12.0.dev",
+  "warp-lang>=1.12.0",
   "mujoco-warp>=3.5.0",
   "mujoco>=3.5.0",
   "trimesh>=4.8.3",
@@ -122,7 +122,7 @@ explicit = true
 warp-lang = { index = "nvidia", marker = "sys_platform != 'darwin'" }
 torch = { index = "pytorch-cu128", extra = "cu128", marker = "sys_platform != 'darwin'" }
 mujoco = { index = "mujoco" }
-mujoco-warp = { git = "https://github.com/google-deepmind/mujoco_warp", rev = "e28c6038cdf8a353b4146974e4cf37e74dda809a" }
+mujoco-warp = { git = "https://github.com/google-deepmind/mujoco_warp", rev = "e5fe9b5" }
 
 [tool.ruff]
 src = ["src"]  # Helpful for recognizing first-party imports.
