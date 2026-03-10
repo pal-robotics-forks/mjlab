@@ -20,6 +20,11 @@ from mjlab.utils.torch import configure_torch_backends
 from mjlab.utils.wandb import add_wandb_tags
 from mjlab.utils.wrappers import VideoRecorder
 
+from mjlab.tasks.AMP.rl import (
+  AmpOnPolicyRunner as AmpOnPolicyRunner,
+  DiscriminatorCfg as DiscriminatorCfg,
+)
+
 
 @dataclass(frozen=True)
 class TrainConfig:
@@ -153,6 +158,12 @@ def run_train(task_id: str, cfg: TrainConfig, log_dir: Path) -> None:
   runner_kwargs = {}
   if is_tracking_task:
     runner_kwargs["registry_name"] = registry_name
+
+  if runner_cls is AmpOnPolicyRunner :
+    discriminator_cgf = DiscriminatorCfg()
+    discriminator_cgf.n_obs = 23
+    discriminator_cgf.device = device
+    runner_kwargs["discriminator_cfg"] = discriminator_cgf
 
   runner = runner_cls(env, agent_cfg, str(log_dir), device, **runner_kwargs)
 
