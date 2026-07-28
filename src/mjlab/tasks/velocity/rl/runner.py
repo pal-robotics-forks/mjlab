@@ -6,6 +6,7 @@ from mjlab.rl.exporter_utils import (
   get_base_metadata,
 )
 from mjlab.rl.runner import MjlabOnPolicyRunner
+from mjlab.rl.multi_critic_runner import MjlabMultiCriticOnPolicyRunner
 
 
 class VelocityOnPolicyRunner(MjlabOnPolicyRunner):
@@ -30,3 +31,72 @@ class VelocityOnPolicyRunner(MjlabOnPolicyRunner):
         wandb.save(str(onnx_path), base_path=str(policy_dir))
     except Exception as e:
       print(f"[WARN] ONNX export failed (training continues): {e}")
+
+
+class VelocityMultiCriticOnPolicyRunner(MjlabMultiCriticOnPolicyRunner):
+  env: RslRlVecEnvWrapper
+
+  def save(
+    self,
+    path: str,
+    infos=None,
+  ):
+    # This saves:
+    #   - actor
+    #   - all MultiCriticPPO critics
+    #   - optimizer state
+    #   - iteration
+    #   - environment common_step_counter
+    super().save(path, infos)
+
+    # -------------------------------------------------------------
+    # Export actor/policy only.
+    #
+    # The critics are used during training but are not needed for
+    # policy inference in the deployed actor.
+    # -------------------------------------------------------------
+    policy_dir, filename, onnx_path = (
+      self._get_export_paths(path)
+    )
+
+    try:
+      self.export_policy_to_onnx(
+        str(policy_dir),
+        filename,
+      )
+
+      run_name: str = (
+        wandb.run.name
+        if (
+          self.logger.logger_type
+          in ("wandb", "WandbLogWriter")
+          and wandb.run
+        )
+        else "local"
+      )  # type: ignore[assignment]
+
+      metadata = get_base_metadata(
+        self.env.unwrapped,
+        run_name,
+      )
+
+      attach_metadata_to_onnx(
+        str(onnx_path),
+        metadata,
+      )
+
+      if (
+        self.logger.logger_type
+        in ("wandb", "WandbLogWriter")
+        and self.cfg["upload_model"]
+      ):
+        wandb.save(
+          str(onnx_path),
+          base_path=str(policy_dir),
+        )
+
+    except Exception as e:
+      print(
+        f"[WARN] ONNX export failed "
+        f"(training continues): {e}"
+      )
