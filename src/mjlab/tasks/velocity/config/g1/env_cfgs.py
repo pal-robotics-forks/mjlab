@@ -405,7 +405,7 @@ def unitree_g1_double_critic_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
     s for s in (cfg.scene.sensors or ()) if s.name != "terrain_scan"
   )
   del cfg.observations["actor"].terms["height_scan"]
-  del cfg.observations["critic"].terms["height_scan"]
+  del cfg.observations["critic_0"].terms["height_scan"]
 
   cfg.terminations.pop("out_of_terrain_bounds", None)
 

@@ -69,14 +69,14 @@ class RslRlVecEnvWrapper(VecEnv):
     obs_dict, extras = self.env.reset()
     return TensorDict(obs_dict, batch_size=[self.num_envs]), extras
 
-  def step(
+  def step( #type: ignore
     self, actions: torch.Tensor
-  ) -> tuple[TensorDict, torch.Tensor, torch.Tensor, dict]:
+  ) -> tuple[TensorDict, torch.Tensor | tuple[torch.Tensor, ...], torch.Tensor, dict]:
     if self.clip_actions is not None:
       actions = torch.clamp(actions, -self.clip_actions, self.clip_actions)
     obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
     term_or_trunc = terminated | truncated
-    assert isinstance(rew, torch.Tensor)
+    assert isinstance(rew, tuple) and all(isinstance(r, torch.Tensor) for r in rew)
     assert isinstance(term_or_trunc, torch.Tensor)
     dones = term_or_trunc.to(dtype=torch.long)
     if not self.cfg.is_finite_horizon:

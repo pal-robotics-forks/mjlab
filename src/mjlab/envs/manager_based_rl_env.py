@@ -448,7 +448,6 @@ class ManagerBasedRlEnv:
     else :
       _reward_buf = dict()
       for reward_name, reward_cfg in self.reward_manager.cfg.items() :
-        assert reward_cfg.group != "", f"Critic group not set for reward {reward_name}"
         if reward_cfg.group in _reward_buf.keys() :
           _reward_buf[reward_cfg.group] += self.reward_manager.compute_term(reward_name, dt=self.step_dt)
         else :

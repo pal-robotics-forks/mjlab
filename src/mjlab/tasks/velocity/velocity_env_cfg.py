@@ -567,7 +567,7 @@ def make_double_critic_velocity_env_cfg() -> ManagerBasedRlEnvCfg:
       concatenate_terms=True,
       enable_corruption=True,
     ),
-    "critic": ObservationGroupCfg(
+    "critic_0": ObservationGroupCfg(
       terms=critic_terms,
       concatenate_terms=True,
       enable_corruption=False,
