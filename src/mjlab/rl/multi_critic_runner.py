@@ -18,7 +18,6 @@ class MjlabMultiCriticOnPolicyRunner(MultiCriticOnPolicyRunner):
     self,
     env: VecEnv,
     train_cfg: dict,
-    num_critics: int,
     log_dir: str | None = None,
     device: str = "cpu",
   ) -> None:
@@ -61,14 +60,10 @@ class MjlabMultiCriticOnPolicyRunner(MultiCriticOnPolicyRunner):
     #   "critic_1": {...}
     #   ...
     # -------------------------------------------------------------
-    if "critic" in train_cfg:
-      self._clean_model_cfg(train_cfg["critic"])
-
-    for critic_idx in range(num_critics):
-      key = f"critic_{critic_idx}"
-      if key in train_cfg:
-        self._clean_model_cfg(train_cfg[key])
-
+    for key, cfg in train_cfg.items():
+      if key.startswith("critic"):
+          self._clean_model_cfg(cfg)
+  
     super().__init__(
       env=env,
       train_cfg=train_cfg,
