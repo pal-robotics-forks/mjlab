@@ -3178,7 +3178,7 @@ wheels = [
 [[package]]
 name = "rsl-rl-lib"
 version = "5.4.2"
-source = { git = "https://github.com/ManuelActisCassa/rsl_rl.git?rev=Muli_critic_PPO#5c0cf7098e20bbf7e648d79d68008a3b1ed990a8" }
+source = { git = "https://github.com/ManuelActisCassa/rsl_rl.git?rev=Muli_critic_PPO#f2ba72643f40ace55214ab0e5b9ccf8755e76349" }
 dependencies = [
     { name = "gitpython" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11' or (extra == 'extra-5-mjlab-cpu' and extra == 'extra-5-mjlab-cu128')" },
