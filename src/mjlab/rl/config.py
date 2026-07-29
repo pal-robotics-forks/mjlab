@@ -63,6 +63,23 @@ class RslRlPpoAlgorithmCfg:
   """Number of critic networks and independent reward streams."""
 
   # --------------------------------------------------------------------------
+  # RND configuration
+  # --------------------------------------------------------------------------
+
+  rnd_cfg: dict[str, Any] | None = None
+  """Random Network Distillation config, passed to MultiCriticPPO.
+
+  When set, enables intrinsic exploration reward. Example::
+
+    {
+        "weight": 0.5,
+        "target_critic": "critic_1",  # which critic receives the intrinsic bonus
+    }
+
+  ``None`` disables RND.
+  """
+
+  # --------------------------------------------------------------------------
   # PPO configuration
   # --------------------------------------------------------------------------
 
