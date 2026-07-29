@@ -146,27 +146,18 @@ class RewardManager(ManagerBase):
 
     if term_cfg.weight == 0.0:
         self._step_reward[:, term_idx] = 0.0
-        return self._reward_buf
+        return self._reward_buf.clone()
 
     value = term_cfg.func(self._env, **term_cfg.params)
     self._check_term_shape(name, value)
-
     value = value * term_cfg.weight * scale
-
-    # NaN/Inf can occur from corrupted physics state; zero them
-    # to avoid policy crash.
-    value = torch.nan_to_num(
-        value,
-        nan=0.0,
-        posinf=0.0,
-        neginf=0.0,
-    )
+    value = torch.nan_to_num(value, nan=0.0, posinf=0.0, neginf=0.0)
 
     self._reward_buf += value
     self._episode_sums[name] += value
     self._step_reward[:, term_idx] = value / scale
 
-    return self._reward_buf
+    return self._reward_buf.clone() 
 
   def debug_vis(self, visualizer: DebugVisualizer) -> None:
     """Delegate debug visualization to class-based reward terms."""
