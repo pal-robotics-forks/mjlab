@@ -78,7 +78,7 @@ def unitree_g1_multi_critic_ppo_runner_cfg() -> RslRlMultiCriticOnPolicyRunnerCf
       desired_kl=0.01,
       max_grad_norm=1.0,
       class_name="MultiCriticPPO",
-      num_critics=1,
+      num_critics=2,
     ),
     experiment_name="g1_velocity",
     save_interval=50,

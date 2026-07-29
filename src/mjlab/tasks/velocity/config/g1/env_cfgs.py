@@ -360,6 +360,9 @@ def unitree_g1_double_critic_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     params={"sensor_name": self_collision_cfg.name, "force_threshold": 10.0},
   )
 
+  cfg.rewards["track_linear_velocity"].group = "critic_1"
+  cfg.rewards["track_angular_velocity"].group = "critic_1"
+
   # Apply play mode overrides.
   if play:
     # Effectively infinite episode length.
