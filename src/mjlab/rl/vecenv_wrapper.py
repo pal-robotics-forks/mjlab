@@ -76,7 +76,10 @@ class RslRlVecEnvWrapper(VecEnv):
       actions = torch.clamp(actions, -self.clip_actions, self.clip_actions)
     obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
     term_or_trunc = terminated | truncated
-    assert isinstance(rew, tuple) and all(isinstance(r, torch.Tensor) for r in rew)
+    if self.cfg.multiple_critics :
+      assert isinstance(rew, tuple) and all(isinstance(r, torch.Tensor) for r in rew)
+    else :
+      assert isinstance(rew, torch.Tensor)
     assert isinstance(term_or_trunc, torch.Tensor)
     dones = term_or_trunc.to(dtype=torch.long)
     if not self.cfg.is_finite_horizon:
