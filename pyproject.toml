@@ -49,7 +49,7 @@ dependencies = [
   "numpy<2.5",
   "imageio-ffmpeg",
   "tensordict",
-  "rsl-rl-lib @ git+https://github.com/ManuelActisCassa/rsl_rl.git@Muli_critic_PPO",
+  "rsl-rl-lib @ git+https://github.com/ManuelActisCassa/rsl_rl.git@18bccf56ab17de932f17804bc8af34ccaa7579bc",
   "tensorboard>=2.20.0",
   "onnxscript>=0.5.4",
   "wandb>=0.22.3",

@@ -1723,7 +1723,7 @@ requires-dist = [
     { name = "numpy", specifier = "<2.5" },
     { name = "onnxscript", specifier = ">=0.5.4" },
     { name = "prettytable" },
-    { name = "rsl-rl-lib", git = "https://github.com/ManuelActisCassa/rsl_rl.git?rev=Muli_critic_PPO" },
+    { name = "rsl-rl-lib", git = "https://github.com/ManuelActisCassa/rsl_rl.git?rev=18bccf56ab17de932f17804bc8af34ccaa7579bc" },
     { name = "scipy", specifier = ">=1.15" },
     { name = "tensorboard", specifier = ">=2.20.0" },
     { name = "tensordict" },
@@ -3178,7 +3178,7 @@ wheels = [
 [[package]]
 name = "rsl-rl-lib"
 version = "5.4.2"
-source = { git = "https://github.com/ManuelActisCassa/rsl_rl.git?rev=Muli_critic_PPO#4b467321f19e664d12aa24ad42a0842a733869b5" }
+source = { git = "https://github.com/ManuelActisCassa/rsl_rl.git?rev=18bccf56ab17de932f17804bc8af34ccaa7579bc#18bccf56ab17de932f17804bc8af34ccaa7579bc" }
 dependencies = [
     { name = "gitpython" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11' or (extra == 'extra-5-mjlab-cpu' and extra == 'extra-5-mjlab-cu128')" },
