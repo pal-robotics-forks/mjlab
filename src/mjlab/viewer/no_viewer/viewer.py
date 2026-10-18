@@ -67,21 +67,8 @@ class HeadlessPlayViewer(BaseViewer):
 
   @override
   def tick(self) -> bool:
-    """Advance one tick: drain actions, step physics, maybe render.
-
-    Returns True when a render frame was produced, False otherwise.
-    """
-    now = time.perf_counter()
-    dt = now - self._last_tick_time
-    self._last_tick_time = now
-
     self._process_actions()
-
-    if self._is_paused:
-      self._forward_paused()
-    else:
-      self._step_physics(dt)
-
+    if not self._is_paused:
+      self._execute_step()
     self._stats_frames += 1
-
     return True
